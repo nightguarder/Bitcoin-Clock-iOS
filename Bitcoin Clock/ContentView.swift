@@ -8,16 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var store = BitcoinStore()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            PriceView(store: store)
+            MarketCapView(store: store)
+            FearGreedView(store: store)
         }
-        .padding()
+        .tabViewStyle(.page)
+        .task {
+            await store.fetchAll()
+        }
     }
 }
+
 
 #Preview {
     ContentView()
