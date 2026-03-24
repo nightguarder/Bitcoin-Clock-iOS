@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FearGreedView: View {
-    var store: BitcoinStore
+    @ObservedObject var store: BitcoinStore
 
     var body: some View {
         ZStack {

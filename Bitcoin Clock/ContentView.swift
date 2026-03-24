@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var store = BitcoinStore()
+    @StateObject private var store = BitcoinStore()
 
     var body: some View {
         TabView {
@@ -24,6 +24,8 @@ struct ContentView: View {
 }
 
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

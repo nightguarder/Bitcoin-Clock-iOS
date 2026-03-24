@@ -180,9 +180,18 @@ struct BitcoinClock_Widget: Widget {
 }
 
 
-#Preview(as: .systemMedium) {
-    BitcoinClock_Widget()
-} timeline: {
-    BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73)
-
+struct BitcoinClock_Widget_Preview_Small: PreviewProvider {
+    static var previews: some View {
+        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73))
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+    }
 }
+
+
+struct BitcoinClock_Widget_Preview_Medium: PreviewProvider {
+    static var previews: some View {
+        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73))
+            .previewContext(WidgetPreviewContext(family: .systemMedium))
+    }
+}
+

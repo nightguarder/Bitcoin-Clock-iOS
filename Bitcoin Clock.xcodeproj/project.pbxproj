@@ -44,6 +44,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D59909BA2F72D2DA00BA9215 /* Exceptions for "Bitcoin Clock" folder in "BitcoinClock WidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/BitcoinData.swift,
+				Models/BitcoinStore.swift,
+				Services/ApiService.swift,
+			);
+			target = D5AC316E2F72CD90003FE9F4 /* BitcoinClock WidgetExtension */;
+		};
 		D5AC31802F72CD91003FE9F4 /* Exceptions for "BitcoinClock Widget" folder in "BitcoinClock WidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -56,6 +65,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D5AC315F2F72CD6D003FE9F4 /* Bitcoin Clock */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D59909BA2F72D2DA00BA9215 /* Exceptions for "Bitcoin Clock" folder in "BitcoinClock WidgetExtension" target */,
+			);
 			path = "Bitcoin Clock";
 			sourceTree = "<group>";
 		};

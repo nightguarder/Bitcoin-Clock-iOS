@@ -5,12 +5,10 @@
 //  Created by nightguarder on 23.03.26.
 //
 
-import Foundation
 import SwiftUI
-import UIKit
 
 struct PriceView: View {
-    var store: BitcoinStore
+    @ObservedObject var store: BitcoinStore
 
     var body: some View {
         ZStack {

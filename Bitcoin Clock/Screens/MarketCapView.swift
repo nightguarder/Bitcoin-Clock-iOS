@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MarketCapView: View {
-    var store: BitcoinStore
+    @ObservedObject var store: BitcoinStore
 
     var body: some View {
         ZStack {
