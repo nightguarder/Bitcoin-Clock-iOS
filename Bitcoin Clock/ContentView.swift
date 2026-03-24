@@ -14,9 +14,12 @@ struct ContentView: View {
         TabView {
             PriceView(store: store)
             MarketCapView(store: store)
-            FearGreedView(store: store)
+            SupplyView(store: store)
         }
         .tabViewStyle(.page)
+        .refreshable {
+            await store.fetchAll()
+        }
         .task {
             await store.fetchAll()
         }

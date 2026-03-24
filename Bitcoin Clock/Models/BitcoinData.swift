@@ -11,6 +11,7 @@ struct BitcoinData {
     let priceEUR: Double
     let marketCap: Double
     let change24h: Double
+    let circulatingSupply: Double
 }
 struct FearGreedData {
     let value: Int
