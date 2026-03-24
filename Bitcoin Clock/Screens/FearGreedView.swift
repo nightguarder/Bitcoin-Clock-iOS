@@ -9,10 +9,11 @@ import SwiftUI
 
 struct FearGreedView: View {
     @ObservedObject var store: BitcoinStore
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             VStack(spacing: 20) {
                 Text("Fear & Greed")
                     .font(.title2)
@@ -30,7 +31,7 @@ struct FearGreedView: View {
 
                     Text("\(store.fgValue)")
                         .font(.system(size: 48, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(colorScheme == .dark ? .white : .black)
                 }
 
                 Text(store.fgClassification)

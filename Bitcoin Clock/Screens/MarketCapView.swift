@@ -9,10 +9,11 @@ import SwiftUI
 
 struct MarketCapView: View {
     @ObservedObject var store: BitcoinStore
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             VStack(spacing: 20) {
 
                 Image(systemName: "chart.bar.fill")
@@ -23,15 +24,15 @@ struct MarketCapView: View {
                     VStack {
                         Text("Market Cap")
                             .font(.caption)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(.secondary)
                         Text(store.marketCap)
                             .font(.title3.bold())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(colorScheme == .dark ? .white : .black)
                     }
                     VStack {
                         Text("24h Change")
                             .font(.caption)
-                            .foregroundStyle(.gray)
+                            .foregroundStyle(.secondary)
                         HStack(spacing: 4) {
                             Image(systemName: store.change24h >= 0 ? "chart.line.uptrend.xyaxis" : "chart.line.downtrend.xyaxis")
                                 .font(.system(size: 14, weight: .bold))

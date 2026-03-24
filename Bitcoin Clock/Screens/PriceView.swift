@@ -9,10 +9,11 @@ import SwiftUI
 
 struct PriceView: View {
     @ObservedObject var store: BitcoinStore
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
 
             VStack(spacing: 20) {
                 Image(systemName: "bitcoinsign.circle.fill")
@@ -25,7 +26,7 @@ struct PriceView: View {
 
                 Text(store.priceEUR)
                     .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(colorScheme == .dark ? .white : .black)
             }
         }
     }

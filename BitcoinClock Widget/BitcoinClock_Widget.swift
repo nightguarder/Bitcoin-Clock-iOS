@@ -58,9 +58,14 @@ struct Provider: TimelineProvider {
 
     
 struct BitcoinClock_WidgetEntryView: View {
-    var entry: Provider.Entry //fetch the latest data
-    @Environment(\.widgetFamily) var family //Important
+    var entry: Provider.Entry
+    @Environment(\.widgetFamily) var family
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
+        let foregroundColor = colorScheme == .dark ? Color.white : Color.black
+        let backgroundColor = colorScheme == .dark ? Color.black : Color.white
+        
         switch family {
         case .systemSmall:
             VStack(spacing: 8) {
@@ -68,7 +73,7 @@ struct BitcoinClock_WidgetEntryView: View {
                                 .font(.largeTitle)
                                 .foregroundStyle(.orange)
                             Text(entry.priceEUR)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(foregroundColor)
                                 .font(.headline)
                         }
         case .systemMedium:
@@ -81,20 +86,20 @@ struct BitcoinClock_WidgetEntryView: View {
                         HStack(alignment: .center, spacing: 2) {
                             Image(systemName: "eurosign")
                                     .font(.system(size: 20, weight: .bold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(foregroundColor)
                             Text(entry.priceEUR)
                                 .font(.system(size: 25, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(foregroundColor)
                         }
                         
                         
                         HStack(alignment: .firstTextBaseline, spacing: 2){
                             Image(systemName: "eurosign")
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(.secondary)
                             Text(entry.marketCap)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(.secondary)
                         }
                         
 
@@ -124,24 +129,24 @@ struct BitcoinClock_WidgetEntryView: View {
 
                     Text(entry.priceEUR)
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(foregroundColor)
 
                     Divider()
-                        .background(.gray)
+                        .background(.secondary)
 
                     HStack(spacing: 40) {
                         VStack {
                             Text("Market Cap")
                                 .font(.caption)
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(.secondary)
                             Text(entry.marketCap)
                                 .font(.title3.bold())
-                                .foregroundStyle(.white)
+                                .foregroundStyle(foregroundColor)
                         }
                         VStack {
                             Text("24h Change")
                                 .font(.caption)
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(.secondary)
                             Text(String(format: "%.2f %%", entry.change24h))
                                 .font(.title3.bold())
                                 .foregroundStyle(entry.change24h >= 0 ? .green : .red)
@@ -166,7 +171,7 @@ struct BitcoinClock_Widget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
                 BitcoinClock_WidgetEntryView(entry: entry)
-                    .containerBackground(.black, for: .widget)
+                    .containerBackground(.fill.tertiary, for: .widget)
             } else {
                 BitcoinClock_WidgetEntryView(entry: entry)
                     .padding()
@@ -175,7 +180,7 @@ struct BitcoinClock_Widget: Widget {
         }
         .configurationDisplayName("Bitcoin Clock")
         .description("Display live Bitcoin price")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])//Important
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
