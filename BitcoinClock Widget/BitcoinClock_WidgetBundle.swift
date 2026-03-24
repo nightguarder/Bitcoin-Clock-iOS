@@ -1,8 +1,8 @@
 //
 //  BitcoinClock_WidgetBundle.swift
-//  BitcoinClock Widget
+//  BitcoinClock-Widget
 //
-//  Created by nightguarder on 24.03.26.
+//  Created by nightguarder on 23.03.26.
 //
 
 import WidgetKit
