@@ -50,6 +50,7 @@
 				Models/BitcoinData.swift,
 				Models/BitcoinStore.swift,
 				Services/ApiService.swift,
+				Services/CacheManager.swift,
 			);
 			target = D5AC316E2F72CD90003FE9F4 /* BitcoinClock WidgetExtension */;
 		};
@@ -108,6 +109,7 @@
 				D5AC31752F72CD90003FE9F4 /* BitcoinClock Widget */,
 				D5AC31702F72CD90003FE9F4 /* Frameworks */,
 				D5AC315E2F72CD6D003FE9F4 /* Products */,
+				D5B7A17E2F86A42F0033C1D5 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -127,6 +129,13 @@
 				D5AC31732F72CD90003FE9F4 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D5B7A17E2F86A42F0033C1D5 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -186,7 +195,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					D5AC315C2F72CD6D003FE9F4 = {
 						CreatedOnToolsVersion = 26.3;
@@ -318,6 +327,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -375,6 +385,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
