@@ -8,55 +8,116 @@
 import WidgetKit
 import SwiftUI
 
-struct BitcoinEntry: TimelineEntry{
+struct BitcoinEntry: TimelineEntry {
     let date: Date
     let priceEUR: String
     let marketCap: String
     let change24h: Double
-}
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> BitcoinEntry {
-        BitcoinEntry(date: Date(), priceEUR: "0000.00", marketCap: "€0.0 T", change24h: 0.0)
+    let isCached: Bool
+    
+    init(date: Date, priceEUR: String, marketCap: String, change24h: Double, isCached: Bool = false) {
+        self.date = date
+        self.priceEUR = priceEUR
+        self.marketCap = marketCap
+        self.change24h = change24h
+        self.isCached = isCached
     }
-    func getSnapshot(in context: Context, completion: @escaping (BitcoinEntry) -> ()) {
-            Task {
-                let api = ApiService()
-                if let data = await api.fetchBitcoin() {
-                    let entry = BitcoinEntry(
-                        date: Date(),
-                        priceEUR: String(format: "%.2f", data.priceEUR),
-                        marketCap: String(format: "%.2f T", data.marketCap / 1_000_000_000_000),
-                        change24h: data.change24h
-                    )
-                    completion(entry)
-                } else {
-                    completion(placeholder(in: context))
-                }
+    
+    init(from data: BitcoinData, isCached: Bool = false) {
+        self.date = Date()
+        self.priceEUR = String(format: "%.2f", data.priceEUR)
+        self.marketCap = String(format: "%.2f T", data.marketCap / 1_000_000_000_000)
+        self.change24h = data.change24h
+        self.isCached = isCached
+    }
+}
+
+private final class WidgetCacheManager {
+    private let userDefaults: UserDefaults
+    private let cacheKey = "widget_cached_bitcoin_data"
+    private let lastFetchKey = "widget_last_fetch_timestamp"
+    
+    init() {
+        self.userDefaults = UserDefaults(suiteName: "group.com.nightguarder.BitcoinClock") ?? UserDefaults.standard
+    }
+    
+    var cachedData: BitcoinData? {
+        get {
+            guard let data = userDefaults.data(forKey: cacheKey) else { return nil }
+            return try? JSONDecoder().decode(BitcoinData.self, from: data)
+        }
+        set {
+            if let newValue = newValue,
+               let data = try? JSONEncoder().encode(newValue) {
+                userDefaults.set(data, forKey: cacheKey)
+                userDefaults.set(Date().timeIntervalSince1970, forKey: lastFetchKey)
+            } else {
+                userDefaults.removeObject(forKey: cacheKey)
+                userDefaults.removeObject(forKey: lastFetchKey)
             }
         }
+    }
+    
+    var lastFetchTime: Date? {
+        let timestamp = userDefaults.double(forKey: lastFetchKey)
+        return timestamp > 0 ? Date(timeIntervalSince1970: timestamp) : nil
+    }
+}
+
+struct Provider: TimelineProvider {
+    private var cache = WidgetCacheManager()
+    
+    func placeholder(in context: Context) -> BitcoinEntry {
+        BitcoinEntry(date: Date(), priceEUR: "0000.00", marketCap: "0.0 T", change24h: 0.0, isCached: false)
+    }
+    
+    func getSnapshot(in context: Context, completion: @escaping (BitcoinEntry) -> ()) {
+        if let cached = cache.cachedData {
+            completion(BitcoinEntry(from: cached, isCached: true))
+            return
+        }
+        
+        Task {
+            let api = ApiService()
+            let result = await api.fetchBitcoin()
+            
+            switch result {
+            case .success(let data):
+                let cacheData = BitcoinData(from: data)
+                cache.cachedData = cacheData
+                completion(BitcoinEntry(from: cacheData))
+            case .failure:
+                completion(placeholder(in: context))
+            }
+        }
+    }
+    
     func getTimeline(in context: Context, completion: @escaping (Timeline<BitcoinEntry>) -> Void) {
         Task {
             let api = ApiService()
-            if let data = await api.fetchBitcoin() {
-                let entry = BitcoinEntry(
-                    date: Date(),
-                    priceEUR: String(format: "%.2f", data.priceEUR),
-                    marketCap: String(format: "%.2f T", data.marketCap / 1_000_000_000_000),
-                    change24h: data.change24h
-                )
-                let nextRefresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date())!
-                let timeline = Timeline(entries: [entry], policy: .after(nextRefresh))
-                completion(timeline)
-            } else {
-                let nextRefresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date())!
-                let timeline = Timeline(entries: [placeholder(in: context)], policy: .after(nextRefresh))
-                completion(timeline)
+            let result = await api.fetchBitcoin()
+            
+            let entry: BitcoinEntry
+            switch result {
+            case .success(let data):
+                let cacheData = BitcoinData(from: data)
+                cache.cachedData = cacheData
+                entry = BitcoinEntry(from: cacheData)
+            case .failure:
+                if let cached = cache.cachedData {
+                    entry = BitcoinEntry(from: cached, isCached: true)
+                } else {
+                    entry = placeholder(in: context)
+                }
             }
+            
+            let nextRefresh = Calendar.current.date(byAdding: .hour, value: 1, to: Date())!
+            let timeline = Timeline(entries: [entry], policy: .after(nextRefresh))
+            completion(timeline)
         }
     }
 }
 
-    
 struct BitcoinClock_WidgetEntryView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
@@ -64,109 +125,109 @@ struct BitcoinClock_WidgetEntryView: View {
     
     var body: some View {
         let foregroundColor = colorScheme == .dark ? Color.white : Color.black
-        let backgroundColor = colorScheme == .dark ? Color.black : Color.white
+        let dataOpacity: Double = entry.isCached ? 0.6 : 1.0
         
         switch family {
         case .systemSmall:
             VStack(spacing: 8) {
-                            Image(systemName: "bitcoinsign.circle.fill")
-                                .font(.largeTitle)
-                                .foregroundStyle(.orange)
-                            Text(entry.priceEUR)
-                                .foregroundStyle(foregroundColor)
-                                .font(.headline)
-                        }
+                Image(systemName: "bitcoinsign.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundStyle(.orange)
+                Text(entry.priceEUR)
+                    .foregroundStyle(foregroundColor.opacity(dataOpacity))
+                    .font(.headline)
+            }
         case .systemMedium:
             HStack(spacing: 4) {
-                    Image(systemName: "bitcoinsign.circle.fill")
-                        .font(.system(size: 50))
-                        .foregroundStyle(.orange)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(alignment: .center, spacing: 2) {
-                            Image(systemName: "eurosign")
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundStyle(foregroundColor)
-                            Text(entry.priceEUR)
-                                .font(.system(size: 25, weight: .bold, design: .rounded))
-                                .foregroundStyle(foregroundColor)
-                        }
-                        
-                        
-                        HStack(alignment: .firstTextBaseline, spacing: 2){
-                            Image(systemName: "eurosign")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                            Text(entry.marketCap)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.secondary)
-                        }
-                        
-
-                        HStack(spacing: 4) {
-                            Image(systemName: entry.change24h >= 0 ? "chart.line.uptrend.xyaxis" : "chart.line.downtrend.xyaxis")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(entry.change24h >= 0 ? .green : .red)
-
-                            Text(String(format: "%.2f %%", entry.change24h))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundStyle(entry.change24h >= 0 ? .green : .red)
-                        }
+                Image(systemName: "bitcoinsign.circle.fill")
+                    .font(.system(size: 50))
+                    .foregroundStyle(.orange)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center, spacing: 2) {
+                        Image(systemName: "eurosign")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(foregroundColor.opacity(dataOpacity))
+                        Text(entry.priceEUR)
+                            .font(.system(size: 25, weight: .bold, design: .rounded))
+                            .foregroundStyle(foregroundColor.opacity(dataOpacity))
                     }
-
-                    Spacer()
+                    
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Image(systemName: "eurosign")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.secondary)
+                        Text(entry.marketCap)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: entry.change24h >= 0 ? "chart.line.uptrend.xyaxis" : "chart.line.downtrend.xyaxis")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(entry.change24h >= 0 ? .green : .red)
+                        
+                        Text(String(format: "%.2f %%", entry.change24h))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(entry.change24h >= 0 ? .green : .red)
+                    }
                 }
-                        .padding()
+                
+                Spacer()
+            }
+            .padding()
         case .systemLarge:
             VStack(spacing: 16) {
-                    Image(systemName: "bitcoinsign.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(.orange)
-
-                    Text("BTC / EUR")
-                        .font(.title2)
-                        .foregroundStyle(.orange)
-
-                    Text(entry.priceEUR)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundStyle(foregroundColor)
-
-                    Divider()
-                        .background(.secondary)
-
-                    HStack(spacing: 40) {
-                        VStack {
-                            Text("Market Cap")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(entry.marketCap)
-                                .font(.title3.bold())
-                                .foregroundStyle(foregroundColor)
-                        }
-                        VStack {
-                            Text("24h Change")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(String(format: "%.2f %%", entry.change24h))
-                                .font(.title3.bold())
-                                .foregroundStyle(entry.change24h >= 0 ? .green : .red)
-                        }
+                Image(systemName: "bitcoinsign.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.orange)
+                
+                Text("BTC / EUR")
+                    .font(.title2)
+                    .foregroundStyle(.orange)
+                
+                Text(entry.priceEUR)
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .foregroundStyle(foregroundColor.opacity(dataOpacity))
+                
+                if entry.isCached {
+                    Text("Cached")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Divider()
+                    .background(.secondary)
+                
+                HStack(spacing: 40) {
+                    VStack {
+                        Text("Market Cap")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(entry.marketCap)
+                            .font(.title3.bold())
+                            .foregroundStyle(foregroundColor)
+                    }
+                    VStack {
+                        Text("24h Change")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(String(format: "%.2f %%", entry.change24h))
+                            .font(.title3.bold())
+                            .foregroundStyle(entry.change24h >= 0 ? .green : .red)
                     }
                 }
-                .padding()
+            }
+            .padding()
         default:
             EmptyView()
         }
-        
     }
 }
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 
 struct BitcoinClock_Widget: Widget {
     let kind: String = "BitcoinClock_Widget"
-
+    
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
@@ -184,19 +245,16 @@ struct BitcoinClock_Widget: Widget {
     }
 }
 
-
 struct BitcoinClock_Widget_Preview_Small: PreviewProvider {
     static var previews: some View {
-        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73))
+        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73, isCached: false))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }
 
-
 struct BitcoinClock_Widget_Preview_Medium: PreviewProvider {
     static var previews: some View {
-        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73))
+        BitcoinClock_WidgetEntryView(entry: BitcoinEntry(date: .now, priceEUR: "12345.123", marketCap: "1.23 T", change24h: 3.73, isCached: false))
             .previewContext(WidgetPreviewContext(family: .systemMedium))
     }
 }
-
