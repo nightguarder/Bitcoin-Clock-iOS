@@ -20,6 +20,8 @@ struct MarketCapView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top)
                 
+                StatusBannerView(store: store)
+                
                 ScrollView {
                     VStack(spacing: 20) {
                         Spacer()

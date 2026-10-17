@@ -23,6 +23,8 @@ struct SupplyView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top)
                 
+                StatusBannerView(store: store)
+                
                 ScrollView {
                     VStack(spacing: 30) {
                         Spacer()
@@ -98,10 +100,14 @@ struct SupplyView: View {
         }
     }
     
-    private func formatNumber(_ number: Double) -> String {
+    private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: number)) ?? "\(Int(number))"
+        return formatter
+    }()
+    
+    private func formatNumber(_ number: Double) -> String {
+        Self.numberFormatter.string(from: NSNumber(value: number)) ?? "\(Int(number))"
     }
 }
