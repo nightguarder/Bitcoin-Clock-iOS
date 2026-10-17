@@ -15,7 +15,6 @@ struct PriceView: View {
         ZStack {
             (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             VStack {
-                //Relative time (e.g., "5 minutes ago")
                 Text("Updated \(store.lastUpdated, style: .relative)")
                     .font(.caption)
                     .frame(maxWidth: .infinity)
@@ -41,9 +40,9 @@ struct PriceView: View {
                     .frame(maxHeight: .infinity)
 
                 }
-            }
-            .refreshable {
-                await store.fetchAll()
+                .refreshable {
+                    await store.fetchAll(forceRefresh: true)
+                }
             }
         }
     }

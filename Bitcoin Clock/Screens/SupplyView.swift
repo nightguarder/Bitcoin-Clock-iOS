@@ -91,9 +91,9 @@ struct SupplyView: View {
                     }
                     .frame(maxHeight: .infinity)
                 }
-            }
-            .refreshable {
-                await store.fetchAll()
+                .refreshable {
+                    await store.fetchAll(forceRefresh: true)
+                }
             }
         }
     }

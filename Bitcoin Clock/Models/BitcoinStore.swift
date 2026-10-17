@@ -34,8 +34,10 @@ public class BitcoinStore: ObservableObject {
         }
     }
 
-    func fetchAll() async {
-        guard cache.canFetch() else { return }
+    func fetchAll(forceRefresh: Bool = false) async {
+        print("[BitcoinStore] fetchAll called, forceRefresh: \(forceRefresh)")
+        if !forceRefresh && !cache.canFetch() { print("[BitcoinStore] Debounced"); return }
+        print("[BitcoinStore] Proceeding with fetch")
         
         let api = ApiService()
         errorMessage = nil
@@ -45,17 +47,21 @@ public class BitcoinStore: ObservableObject {
         await MainActor.run {
             switch result {
             case .success(let data):
+                print("[BitcoinStore] API SUCCESS")
                 let cacheData = BitcoinData(from: data)
                 self.cache.cachedData = cacheData
                 
+                print("[BitcoinStore] Setting lastUpdated to: \(cacheData.cachedAt)")
                 self.priceEUR = String(format: "€%.2f", data.priceEUR)
                 self.marketCap = String(format: "€%.2fT", data.marketCap / 1_000_000_000_000)
                 self.change24h = data.change24h
                 self.circulatingSupply = data.circulatingSupply
                 self.lastUpdated = cacheData.cachedAt
+                print("[BitcoinStore] lastUpdated is now: \(self.lastUpdated)")
                 self.errorMessage = nil
                 self.isUsingCachedData = false
             case .failure(let error):
+                print("[BitcoinStore] API FAILURE: \(error.localizedDescription)")
                 if let cached = self.cache.cachedData {
                     self.priceEUR = String(format: "€%.2f", cached.priceEUR)
                     self.marketCap = String(format: "€%.2fT", cached.marketCap / 1_000_000_000_000)

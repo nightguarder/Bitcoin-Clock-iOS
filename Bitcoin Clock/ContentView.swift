@@ -17,9 +17,6 @@ struct ContentView: View {
             SupplyView(store: store)
         }
         .tabViewStyle(.page)
-        .refreshable {
-            await store.fetchAll()
-        }
         .task {
             await store.fetchAll()
         }

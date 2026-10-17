@@ -10,6 +10,7 @@
 		D5AC31722F72CD90003FE9F4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5AC31712F72CD90003FE9F4 /* WidgetKit.framework */; };
 		D5AC31742F72CD90003FE9F4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5AC31732F72CD90003FE9F4 /* SwiftUI.framework */; };
 		D5AC317F2F72CD91003FE9F4 /* BitcoinClock WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D5AC316F2F72CD90003FE9F4 /* BitcoinClock WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D5EAECCA2F94F8EF00B51F0A /* BitcoinClock WidgetExtension.appex in Resources */ = {isa = PBXBuildFile; fileRef = D5AC316F2F72CD90003FE9F4 /* BitcoinClock WidgetExtension.appex */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,7 +26,7 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		D5AC31842F72CD91003FE9F4 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
@@ -230,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D5EAECCA2F94F8EF00B51F0A /* BitcoinClock WidgetExtension.appex in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +400,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CG5NT4MKFC;
+				DEVELOPMENT_TEAM = UBH6VL7DJV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -431,7 +433,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CG5NT4MKFC;
+				DEVELOPMENT_TEAM = UBH6VL7DJV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -464,7 +466,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CG5NT4MKFC;
+				DEVELOPMENT_TEAM = UBH6VL7DJV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "BitcoinClock Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "BitcoinClock Widget";
@@ -476,7 +478,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Nightguarder.Bitcoin-Clock.BitcoinClock-Widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "Nightguarder.Bitcoin-Clock.WidgetExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -495,7 +497,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CG5NT4MKFC;
+				DEVELOPMENT_TEAM = UBH6VL7DJV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "BitcoinClock Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "BitcoinClock Widget";
@@ -507,7 +509,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Nightguarder.Bitcoin-Clock.BitcoinClock-Widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "Nightguarder.Bitcoin-Clock.WidgetExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
