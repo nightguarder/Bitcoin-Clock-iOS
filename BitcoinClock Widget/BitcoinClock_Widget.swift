@@ -32,40 +32,8 @@ struct BitcoinEntry: TimelineEntry {
     }
 }
 
-private final class WidgetCacheManager {
-    private let userDefaults: UserDefaults
-    private let cacheKey = "widget_cached_bitcoin_data"
-    private let lastFetchKey = "widget_last_fetch_timestamp"
-    
-    init() {
-        self.userDefaults = UserDefaults(suiteName: "group.com.nightguarder.BitcoinClock") ?? UserDefaults.standard
-    }
-    
-    var cachedData: BitcoinData? {
-        get {
-            guard let data = userDefaults.data(forKey: cacheKey) else { return nil }
-            return try? JSONDecoder().decode(BitcoinData.self, from: data)
-        }
-        set {
-            if let newValue = newValue,
-               let data = try? JSONEncoder().encode(newValue) {
-                userDefaults.set(data, forKey: cacheKey)
-                userDefaults.set(Date().timeIntervalSince1970, forKey: lastFetchKey)
-            } else {
-                userDefaults.removeObject(forKey: cacheKey)
-                userDefaults.removeObject(forKey: lastFetchKey)
-            }
-        }
-    }
-    
-    var lastFetchTime: Date? {
-        let timestamp = userDefaults.double(forKey: lastFetchKey)
-        return timestamp > 0 ? Date(timeIntervalSince1970: timestamp) : nil
-    }
-}
-
 struct Provider: TimelineProvider {
-    private var cache = WidgetCacheManager()
+    private var cache = CacheManager.shared
     
     func placeholder(in context: Context) -> BitcoinEntry {
         BitcoinEntry(date: Date(), priceEUR: "0000.00", marketCap: "0.0 T", change24h: 0.0, isCached: false)
@@ -78,14 +46,12 @@ struct Provider: TimelineProvider {
         }
         
         Task {
-            let api = ApiService()
-            let result = await api.fetchBitcoin()
+            let result = await ApiService.fetchBitcoin()
             
             switch result {
             case .success(let data):
-                let cacheData = BitcoinData(from: data)
-                cache.cachedData = cacheData
-                completion(BitcoinEntry(from: cacheData))
+                cache.cachedData = data
+                completion(BitcoinEntry(from: data))
             case .failure:
                 completion(placeholder(in: context))
             }
@@ -94,20 +60,23 @@ struct Provider: TimelineProvider {
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<BitcoinEntry>) -> Void) {
         Task {
-            let api = ApiService()
-            let result = await api.fetchBitcoin()
-            
             let entry: BitcoinEntry
-            switch result {
-            case .success(let data):
-                let cacheData = BitcoinData(from: data)
-                cache.cachedData = cacheData
-                entry = BitcoinEntry(from: cacheData)
-            case .failure:
-                if let cached = cache.cachedData {
-                    entry = BitcoinEntry(from: cached, isCached: true)
-                } else {
-                    entry = placeholder(in: context)
+            
+            if let cached = cache.cachedData, cache.isCacheFresh {
+                entry = BitcoinEntry(from: cached)
+            } else {
+                let result = await ApiService.fetchBitcoin()
+                
+                switch result {
+                case .success(let data):
+                    cache.cachedData = data
+                    entry = BitcoinEntry(from: data)
+                case .failure:
+                    if let cached = cache.cachedData {
+                        entry = BitcoinEntry(from: cached, isCached: true)
+                    } else {
+                        entry = placeholder(in: context)
+                    }
                 }
             }
             
