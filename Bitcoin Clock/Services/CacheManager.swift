@@ -9,11 +9,13 @@ import Foundation
 
 public final class CacheManager {
     static let shared = CacheManager()
+    static let appGroupID = "group.com.nightguarder.BitcoinClock"
     
-    private let userDefaults = UserDefaults.standard
+    private let userDefaults = UserDefaults(suiteName: CacheManager.appGroupID) ?? UserDefaults.standard
     private let cacheKey = "cached_bitcoin_data"
     private let lastFetchKey = "last_fetch_timestamp"
     private let debounceInterval: TimeInterval = 30
+    private let maxCacheAge: TimeInterval = 300
     
     private init() {}
     
@@ -37,6 +39,11 @@ public final class CacheManager {
     var lastFetchTime: Date? {
         let timestamp = userDefaults.double(forKey: lastFetchKey)
         return timestamp > 0 ? Date(timeIntervalSince1970: timestamp) : nil
+    }
+    
+    var isCacheFresh: Bool {
+        guard let lastFetch = lastFetchTime else { return false }
+        return Date().timeIntervalSince(lastFetch) < maxCacheAge
     }
     
     func canFetch() -> Bool {

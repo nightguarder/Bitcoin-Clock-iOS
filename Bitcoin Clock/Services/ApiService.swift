@@ -35,7 +35,7 @@ enum ApiError: Error, LocalizedError {
 
 class ApiService {
 
-    func fetchBitcoin() async -> Result<BitcoinData, ApiError> {
+    static func fetchBitcoin() async -> Result<BitcoinData, ApiError> {
         let urlString = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids=bitcoin"
         
         guard let url = URL(string: urlString) else {

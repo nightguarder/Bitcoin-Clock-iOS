@@ -21,12 +21,4 @@ struct BitcoinData: Codable {
         self.circulatingSupply = circulatingSupply
         self.cachedAt = Date()
     }
-
-    init(from data: BitcoinData) {
-        self.priceEUR = data.priceEUR
-        self.marketCap = data.marketCap
-        self.change24h = data.change24h
-        self.circulatingSupply = data.circulatingSupply
-        self.cachedAt = data.cachedAt
-    }
 }

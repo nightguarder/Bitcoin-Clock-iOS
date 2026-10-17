@@ -37,22 +37,20 @@ public class BitcoinStore: ObservableObject {
     func fetchAll(forceRefresh: Bool = false) async {
         if !forceRefresh && !cache.canFetch() { return }
         
-        let api = ApiService()
         errorMessage = nil
         
-        let result = await api.fetchBitcoin()
+        let result = await ApiService.fetchBitcoin()
         
         await MainActor.run {
             switch result {
             case .success(let data):
-                let cacheData = BitcoinData(from: data)
-                self.cache.cachedData = cacheData
+                self.cache.cachedData = data
                 
                 self.priceEUR = String(format: "€%.2f", data.priceEUR)
                 self.marketCap = String(format: "€%.2fT", data.marketCap / 1_000_000_000_000)
                 self.change24h = data.change24h
                 self.circulatingSupply = data.circulatingSupply
-                self.lastUpdated = cacheData.cachedAt
+                self.lastUpdated = data.cachedAt
                 self.errorMessage = nil
                 self.isUsingCachedData = false
             case .failure(let error):
