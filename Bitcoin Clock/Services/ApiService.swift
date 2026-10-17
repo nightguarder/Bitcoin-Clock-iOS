@@ -36,12 +36,9 @@ enum ApiError: Error, LocalizedError {
 class ApiService {
 
     func fetchBitcoin() async -> Result<BitcoinData, ApiError> {
-        print("[ApiService] fetchBitcoin() called")
-        
         let urlString = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&ids=bitcoin"
         
         guard let url = URL(string: urlString) else {
-            print("[ApiService] ERROR: Invalid URL")
             return .failure(.invalidURL)
         }
         
@@ -50,30 +47,21 @@ class ApiService {
         request.httpMethod = "GET"
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1", forHTTPHeaderField: "User-Agent")
         
-        print("[ApiService] Making request...")
-        
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            print("[ApiService] Response received")
             
             guard let httpResponse = response as? HTTPURLResponse else {
-                print("[ApiService] ERROR: Not HTTPURLResponse")
                 return .failure(.invalidResponse)
             }
             
-            print("[ApiService] HTTP Status: \(httpResponse.statusCode)")
-            
             if httpResponse.statusCode == 429 {
-                print("[ApiService] ERROR: Rate limited (429)")
                 return .failure(.rateLimited)
             }
             if httpResponse.statusCode != 200 {
-                print("[ApiService] ERROR: Non-200 status")
                 return .failure(.invalidResponse)
             }
             
             if data.isEmpty {
-                print("[ApiService] ERROR: Empty data")
                 return .failure(.noData)
             }
             
@@ -85,14 +73,11 @@ class ApiService {
                   let marketCap = bitcoin["market_cap"] as? Double,
                   let change24h = bitcoin["price_change_percentage_24h"] as? Double,
                   let circulatingSupply = bitcoin["circulating_supply"] as? Double else {
-                print("[ApiService] ERROR: Decoding failed")
                 return .failure(.decodingError("Missing required fields"))
             }
             
-            print("[ApiService] SUCCESS: priceEUR=\(priceEUR)")
             return .success(BitcoinData(priceEUR: priceEUR, marketCap: marketCap, change24h: change24h, circulatingSupply: circulatingSupply))
         } catch {
-            print("[ApiService] ERROR: \(error.localizedDescription)")
             return .failure(.networkError(error.localizedDescription))
         }
     }
