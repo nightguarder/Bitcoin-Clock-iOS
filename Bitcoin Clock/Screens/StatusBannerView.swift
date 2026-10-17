@@ -10,20 +10,35 @@ import SwiftUI
 struct StatusBannerView: View {
     @ObservedObject var store: BitcoinStore
 
+    private var age: TimeInterval { Date().timeIntervalSince(store.lastUpdated) }
+
+    @ViewBuilder
     var body: some View {
-        Group {
-            if let error = store.errorMessage {
+        if let error = store.errorMessage {
+            VStack(spacing: 2) {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            } else if store.isUsingCachedData {
-                Label("Offline — showing cached data", systemImage: "wifi.slash")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
+                if store.isUsingCachedData {
+                    ageText
+                }
             }
+            .padding(.horizontal)
+        } else if store.isUsingCachedData && age > 60 {
+            ageText
+                .padding(.horizontal)
         }
+    }
+
+    private var ageText: some View {
+        Label {
+            Text("Showing data from \(store.lastUpdated, style: .relative)")
+                .font(.caption)
+        } icon: {
+            Image(systemName: "clock.arrow.circlepath")
+        }
+        .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
     }
 }

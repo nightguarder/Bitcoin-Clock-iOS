@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct ContentView: View {
     @StateObject private var store = BitcoinStore()
@@ -19,6 +20,11 @@ struct ContentView: View {
         .tabViewStyle(.page)
         .task {
             await store.fetchAll()
+            for await connected in NetworkMonitor.shared.$isConnected.values {
+                guard connected,
+                      store.errorMessage != nil || store.isUsingCachedData else { continue }
+                await store.fetchAll(forceRefresh: true)
+            }
         }
     }
 }

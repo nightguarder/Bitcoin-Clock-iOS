@@ -17,7 +17,34 @@ public final class CacheManager {
     private let debounceInterval: TimeInterval = 30
     private let maxCacheAge: TimeInterval = 300
     
-    private init() {}
+    private init() {
+        migrateLegacyCache()
+    }
+    
+    private func migrateLegacyCache() {
+        guard userDefaults.data(forKey: cacheKey) == nil else { return }
+        
+        let defaults = UserDefaults.standard
+        let candidates = [
+            (dataKey: cacheKey, timeKey: lastFetchKey),
+            (dataKey: "widget_cached_bitcoin_data", timeKey: "widget_last_fetch_timestamp"),
+        ]
+        
+        var best: (data: Data, timestamp: TimeInterval)?
+        for candidate in candidates {
+            guard let data = defaults.data(forKey: candidate.dataKey),
+                  let decoded = try? JSONDecoder().decode(BitcoinData.self, from: data) else { continue }
+            let stored = defaults.double(forKey: candidate.timeKey)
+            let timestamp = stored > 0 ? stored : decoded.cachedAt.timeIntervalSince1970
+            if timestamp > (best?.timestamp ?? 0) {
+                best = (data, timestamp)
+            }
+        }
+        
+        guard let best else { return }
+        userDefaults.set(best.data, forKey: cacheKey)
+        userDefaults.set(best.timestamp, forKey: lastFetchKey)
+    }
     
     var cachedData: BitcoinData? {
         get {
