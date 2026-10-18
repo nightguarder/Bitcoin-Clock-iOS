@@ -15,14 +15,9 @@ struct PriceView: View {
         ZStack {
             (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             VStack {
-                Text("Updated \(store.lastUpdated, style: .relative)")
-                    .font(.caption)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top)
                 StatusBannerView(store: store)
                 ScrollView{
                     VStack(spacing: 20) {
-                        Spacer()
                         Image(systemName: "bitcoinsign.circle.fill")
                             .font(.system(size: 80))
                             .foregroundStyle(.orange)
@@ -36,9 +31,7 @@ struct PriceView: View {
                             .foregroundStyle(colorScheme == .dark ? .white : .black)
                             .padding()
                         
-                        Spacer()
                     }
-                    .frame(maxHeight: .infinity)
 
                 }
                 .refreshable {

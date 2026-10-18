@@ -142,7 +142,6 @@ struct BitcoinClock_WidgetEntryView: View {
                     }
                 }
                 
-                Spacer()
             }
             .padding()
         case .systemLarge:

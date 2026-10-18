@@ -15,16 +15,11 @@ struct MarketCapView: View {
         ZStack {
             (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             VStack {
-                Text("Updated \(store.lastUpdated, style: .relative)")
-                    .font(.caption)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top)
                 
                 StatusBannerView(store: store)
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        Spacer()
                         
                         Image(systemName: "chart.bar.fill")
                             .font(.system(size: 80))
@@ -54,9 +49,7 @@ struct MarketCapView: View {
                             }
                         }
                         
-                        Spacer()
                     }
-                    .frame(maxHeight: .infinity)
                 }
                 .refreshable {
                     await store.fetchAll(forceRefresh: true)

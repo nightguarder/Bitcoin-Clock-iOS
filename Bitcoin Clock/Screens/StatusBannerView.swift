@@ -10,35 +10,20 @@ import SwiftUI
 struct StatusBannerView: View {
     @ObservedObject var store: BitcoinStore
 
-    private var age: TimeInterval { Date().timeIntervalSince(store.lastUpdated) }
-
-    @ViewBuilder
     var body: some View {
-        if let error = store.errorMessage {
-            VStack(spacing: 2) {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
+        Group {
+            if let error = store.errorMessage {
+                Text("⚠ \(error) — last updated \(store.lastUpdated, style: .relative)")
                     .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
-                if store.isUsingCachedData {
-                    ageText
-                }
+            } else {
+                Text("Last updated \(store.lastUpdated, style: .relative)")
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal)
-        } else if store.isUsingCachedData && age > 60 {
-            ageText
-                .padding(.horizontal)
         }
-    }
-
-    private var ageText: some View {
-        Label {
-            Text("Showing data from \(store.lastUpdated, style: .relative)")
-                .font(.caption)
-        } icon: {
-            Image(systemName: "clock.arrow.circlepath")
-        }
-        .foregroundStyle(.secondary)
+        //carefull this is added to every screen the component is in
+        .font(.caption)
         .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.top)
     }
 }

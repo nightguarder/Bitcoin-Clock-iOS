@@ -18,16 +18,11 @@ struct SupplyView: View {
             (colorScheme == .dark ? Color.black : Color.white).ignoresSafeArea()
             
             VStack {
-                Text("Updated \(store.lastUpdated, style: .relative)")
-                    .font(.caption)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top)
                 
                 StatusBannerView(store: store)
                 
                 ScrollView {
                     VStack(spacing: 30) {
-                        Spacer()
                         
                         Image(systemName: "bitcoinsign.circle.fill")
                             .font(.system(size: 80))
@@ -62,7 +57,6 @@ struct SupplyView: View {
                             HStack {
                                 Text("Mined")
                                     .foregroundStyle(.secondary)
-                                Spacer()
                                 Text("\(Int((store.circulatingSupply / maxSupply) * 100))%")
                                     .fontWeight(.bold)
                                     .foregroundStyle(colorScheme == .dark ? .white : .black)
@@ -71,7 +65,6 @@ struct SupplyView: View {
                             HStack {
                                 Text("Remaining")
                                     .foregroundStyle(.secondary)
-                                Spacer()
                                 Text(formatNumber(maxSupply - store.circulatingSupply))
                                     .fontWeight(.bold)
                                     .foregroundStyle(colorScheme == .dark ? .white : .black)
@@ -80,7 +73,6 @@ struct SupplyView: View {
                             HStack {
                                 Text("Max Supply")
                                     .foregroundStyle(.secondary)
-                                Spacer()
                                 Text(formatNumber(maxSupply))
                                     .fontWeight(.bold)
                                     .foregroundStyle(colorScheme == .dark ? .white : .black)
@@ -89,9 +81,7 @@ struct SupplyView: View {
                         .font(.body)
                         .padding(.horizontal, 40)
                         
-                        Spacer()
                     }
-                    .frame(maxHeight: .infinity)
                 }
                 .refreshable {
                     await store.fetchAll(forceRefresh: true)
