@@ -49,12 +49,35 @@ struct MarketCapView: View {
                             }
                         }
                         
+                        VStack(spacing: 12) {
+                            Picker("Range", selection: rangeBinding) {
+                                ForEach(ChartRange.allCases) { range in
+                                    Text(range.label).tag(range)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            
+                            PriceChartView(points: store.pricePoints, range: store.chartRange)
+                                .padding(.horizontal, 4)
+                        }
+                        .padding(.top, 12)
+                        
                     }
+                    .padding(.horizontal)
                 }
                 .refreshable {
                     await store.fetchAll(forceRefresh: true)
                 }
             }
         }
+    }
+    
+    private var rangeBinding: Binding<ChartRange> {
+        Binding(
+            get: { store.chartRange },
+            set: { newValue in
+                Task { await store.setChartRange(newValue) }
+            }
+        )
     }
 }

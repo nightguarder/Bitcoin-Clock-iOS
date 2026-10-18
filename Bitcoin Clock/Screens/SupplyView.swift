@@ -24,34 +24,9 @@ struct SupplyView: View {
                 ScrollView {
                     VStack(spacing: 30) {
                         
-                        Image(systemName: "bitcoinsign.circle.fill")
-                            .font(.system(size: 80))
-                            .foregroundStyle(.orange)
-                        
                         Text("Bitcoin Supply")
                             .font(.title2)
                             .foregroundStyle(.orange)
-                        
-                        ZStack {
-                            Circle()
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 20)
-                                .frame(width: 200, height: 200)
-                            
-                            Circle()
-                                .trim(from: 0, to: min(store.circulatingSupply / maxSupply, 1.0))
-                                .stroke(Color.orange, style: StrokeStyle(lineWidth: 20, lineCap: .round))
-                                .frame(width: 200, height: 200)
-                                .rotationEffect(.degrees(-90))
-                            
-                            VStack(spacing: 4) {
-                                Text(formatNumber(store.circulatingSupply))
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                                    .foregroundStyle(colorScheme == .dark ? .white : .black)
-                                Text("BTC")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
                         
                         VStack(spacing: 8) {
                             HStack {
@@ -80,6 +55,27 @@ struct SupplyView: View {
                         }
                         .font(.body)
                         .padding(.horizontal, 40)
+                        
+                        ZStack {
+                            Circle()
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 20)
+                                .frame(width: 200, height: 200)
+                            
+                            Circle()
+                                .trim(from: 0, to: min(store.circulatingSupply / maxSupply, 1.0))
+                                .stroke(Color.orange, style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                                .frame(width: 200, height: 200)
+                                .rotationEffect(.degrees(-90))
+                            
+                            VStack(spacing: 4) {
+                                Text(formatNumber(store.circulatingSupply))
+                                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                                    .foregroundStyle(colorScheme == .dark ? .white : .black)
+                                Text("BTC")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                         
                     }
                 }

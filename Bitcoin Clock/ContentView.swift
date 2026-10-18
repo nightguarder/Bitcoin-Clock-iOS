@@ -16,6 +16,7 @@ struct ContentView: View {
             PriceView(store: store)
             MarketCapView(store: store)
             SupplyView(store: store)
+            FearGreedView(store: store)
         }
         .tabViewStyle(.page)
         .task {

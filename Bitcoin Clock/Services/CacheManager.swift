@@ -16,6 +16,12 @@ public final class CacheManager {
     private let lastFetchKey = "last_fetch_timestamp"
     private let debounceInterval: TimeInterval = 30
     private let maxCacheAge: TimeInterval = 300
+    private let historyCacheKeyPrefix = "cached_price_history_"
+    private let historyFetchKeyPrefix = "price_history_fetch_"
+    private let historyMaxCacheAge: TimeInterval = 1800
+    private let fearGreedCacheKey = "cached_fear_greed"
+    private let fearGreedFetchKey = "fear_greed_fetch_timestamp"
+    private let fearGreedMaxCacheAge: TimeInterval = 6 * 3600
     
     private init() {
         migrateLegacyCache()
@@ -76,6 +82,46 @@ public final class CacheManager {
     func canFetch() -> Bool {
         guard let lastFetch = lastFetchTime else { return true }
         return Date().timeIntervalSince(lastFetch) >= debounceInterval
+    }
+    
+    func cachedPriceHistory(_ range: ChartRange) -> [PricePoint]? {
+        guard let data = userDefaults.data(forKey: historyCacheKeyPrefix + "\(range.rawValue)") else { return nil }
+        return try? JSONDecoder().decode([PricePoint].self, from: data)
+    }
+    
+    func setCachedPriceHistory(_ points: [PricePoint], for range: ChartRange) {
+        guard let data = try? JSONEncoder().encode(points) else { return }
+        userDefaults.set(data, forKey: historyCacheKeyPrefix + "\(range.rawValue)")
+        userDefaults.set(Date().timeIntervalSince1970, forKey: historyFetchKeyPrefix + "\(range.rawValue)")
+    }
+    
+    func isPriceHistoryFresh(_ range: ChartRange) -> Bool {
+        let timestamp = userDefaults.double(forKey: historyFetchKeyPrefix + "\(range.rawValue)")
+        guard timestamp > 0 else { return false }
+        return Date().timeIntervalSince1970 - timestamp < historyMaxCacheAge
+    }
+    
+    var cachedFearGreed: FearGreedData? {
+        get {
+            guard let data = userDefaults.data(forKey: fearGreedCacheKey) else { return nil }
+            return try? JSONDecoder().decode(FearGreedData.self, from: data)
+        }
+        set {
+            if let newValue = newValue,
+               let data = try? JSONEncoder().encode(newValue) {
+                userDefaults.set(data, forKey: fearGreedCacheKey)
+                userDefaults.set(Date().timeIntervalSince1970, forKey: fearGreedFetchKey)
+            } else {
+                userDefaults.removeObject(forKey: fearGreedCacheKey)
+                userDefaults.removeObject(forKey: fearGreedFetchKey)
+            }
+        }
+    }
+    
+    var isFearGreedFresh: Bool {
+        let timestamp = userDefaults.double(forKey: fearGreedFetchKey)
+        guard timestamp > 0 else { return false }
+        return Date().timeIntervalSince1970 - timestamp < fearGreedMaxCacheAge
     }
     
     func clearCache() {
