@@ -24,6 +24,14 @@ struct SupplyView: View {
                 ScrollView {
                     VStack(spacing: 30) {
                         
+                        ZStack {
+                            Circle()
+                                .fill(.orange)
+                            Text("⛏️")
+                                .font(.system(size: 40))
+                        }
+                        .frame(width: 80, height: 80)
+                        
                         Text("Bitcoin Supply")
                             .font(.title2)
                             .foregroundStyle(.orange)

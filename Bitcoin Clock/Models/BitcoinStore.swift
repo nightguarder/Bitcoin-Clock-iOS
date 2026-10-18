@@ -51,11 +51,18 @@ public class BitcoinStore: ObservableObject {
         async let historyResult = ApiService.fetchPriceHistory(range: chartRange)
         async let fearGreedResult = ApiService.fetchFearGreed()
         
-        let (market, history, fearGreed) = await (marketResult, historyResult, fearGreedResult)
-        
+        let market = await marketResult
         await MainActor.run {
             self.applyMarketResult(market, forceRefresh: forceRefresh)
+        }
+        
+        let history = await historyResult
+        await MainActor.run {
             self.applyHistoryResult(history, for: self.chartRange)
+        }
+        
+        let fearGreed = await fearGreedResult
+        await MainActor.run {
             self.applyFearGreedResult(fearGreed)
         }
     }
